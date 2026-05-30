@@ -1,0 +1,11 @@
+﻿namespace BtkAkademiAi.WebApi.Dtos.ArticleDtos
+{
+    public class LastArticleByCategoryDto
+    {
+        public int ArticleId { get; set; }
+        public string CategoryName { get; set; }
+        public string ArticleTitle { get; set; }
+        public string SliderCategoryImageUrl { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+}

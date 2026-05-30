@@ -1,0 +1,6 @@
+@BtkAkademiAi.WebApi_HostAddress = http://localhost:5175
+
+GET {{BtkAkademiAi.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

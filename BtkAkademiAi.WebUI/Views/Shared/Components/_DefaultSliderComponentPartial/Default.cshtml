@@ -1,0 +1,25 @@
+﻿@model List<ResultArticleDto>
+
+<div class="col-lg-6">
+    <ul class="back-hero-slider owl-carousel">
+        @foreach(var item in Model)
+        {
+             <li>
+            <div class="image-area">
+                <a href="#"><img src="@item.FeatureSliderImageUrl" alt="image"></a>
+                <div class="back-btm-content">
+                    <a href="#" class="back-cate back-life">@item.CategoryName</a>
+                    <h3><a href="#">@item.ArticleTitle</a></h3>
+                    <ul>
+                        <li class="back-author"><span><img src="@item.AuthorImageUrl" alt="image"></span><a href="#">@item.AuthorName @item.AuthorSurname</a></li>
+                        <li class="back-date"><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>@item.CreatedDate.ToString("dd-MMM-yyyy")</li>
+                        <li class="back-comments"><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>0 YORUM</li>
+                    </ul>
+                </div>
+            </div>
+        </li>
+        }
+
+       
+    </ul>
+</div>
