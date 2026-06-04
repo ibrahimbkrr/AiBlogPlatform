@@ -6,5 +6,14 @@
         public string VideoTitle { get; set; }
         public string VideoUrl { get; set; }
         public string VideoDescription { get; set; }
+        public bool IsFeature { get; set; }
+        public string? FeatureImageUrl { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+        public string? AppUserId { get; set; }
+        public AppUser AppUser { get; set; }
+
+        public int? CategoryId { get; set; }
+        public Category Category { get; set; }
     }
 }

@@ -11,5 +11,7 @@ namespace BtkAkademiAi.WebApi.Entities
         public string ImageUrl { get; set; }
 
         public List<Article> Articles { get; set; }
+
+        public List<TradingVideo> TradingVideos { get; set; }
     }
 }

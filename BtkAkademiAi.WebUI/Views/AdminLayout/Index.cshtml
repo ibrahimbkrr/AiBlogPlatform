@@ -1,0 +1,33 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html lang="en" class="minimal-theme">
+
+        @await Component.InvokeAsync("_AdminHeadComponentPartial")
+
+<body>
+ 
+    <div class="wrapper">
+        
+        @await Component.InvokeAsync("_AdminNavBarComponentPartial")      
+       
+		@await Component.InvokeAsync("_AdminSidebarComponentPartial")       
+        
+		@RenderBody()
+        
+        <div class="overlay nav-toggle-icon"></div>
+        
+        <a href="javaScript:;" class="back-to-top"><i class='bx bxs-up-arrow-alt'></i></a>
+       
+        @await Component.InvokeAsync("_AdminSwitcherComponentPartial")
+        <!--end switcher-->
+
+    </div>
+    @await Component.InvokeAsync("_AdminScriptsComponentPartial")
+
+</body>
+
+</html>

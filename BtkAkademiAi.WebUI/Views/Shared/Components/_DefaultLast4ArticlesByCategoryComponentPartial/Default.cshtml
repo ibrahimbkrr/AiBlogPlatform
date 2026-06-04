@@ -1,0 +1,28 @@
+﻿@model List<GetLastFourArticleByCategoryDto>
+
+<div class="col-lg-4 md-mt-40">
+    <ul class="back-hero-bottom">
+        @foreach (var item in Model)
+        {
+            <li>
+                <div class="image-areas">
+                    <a href="#">
+                        <img src="@item.TrendImageUrl" alt="image">
+                    </a>
+                </div>
+
+                <div class="back-btm-content">
+                    <a href="#" class="back-cates">
+                        @item.CategoryName
+                    </a>
+
+                    <h3>
+                        <a href="#">
+                            @item.ArticleTitle
+                        </a>
+                    </h3>
+                </div>
+            </li>
+        }
+    </ul>
+</div>

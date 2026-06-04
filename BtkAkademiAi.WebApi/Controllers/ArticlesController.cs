@@ -80,7 +80,7 @@ namespace BtkAkademiAi.WebApi.Controllers
         public IActionResult GetFeatureSliderArticles()
         {
             var articles = _context.Articles
-                .Where(a => a.IsFeatureSlider)          
+                .Where(a => a.IsFeatureSlider)
                 .Include(c => c.Category)
                 .Include(b => b.AppUser)
                 .ToList();
@@ -109,7 +109,7 @@ namespace BtkAkademiAi.WebApi.Controllers
         public IActionResult GetLastSportsArticle()
         {
             var categoryId = _context.Categories
-                .Where(x => x.CategoryName == "Spor") 
+                .Where(x => x.CategoryName == "Spor")
                 .Select(x => x.CategoryId)
                 .FirstOrDefault();
             var articles = _context.Articles
@@ -151,5 +151,51 @@ namespace BtkAkademiAi.WebApi.Controllers
 
             return Ok(articleDtos);
         }
+
+        [HttpGet("GetTrendingArticles")]
+
+        public IActionResult GetTrendingArticles()
+        {
+            var articles = _context.Articles
+              .Where(a => a.IsTrendingStories == true)
+              .Include(c => c.Category)
+              .Include(b => b.AppUser)
+              .ToList();
+
+            var articleDtos = _mapper.Map<List<TrendArticlesDto>>(articles);
+
+            return Ok(articleDtos);
+
+
+        }
+        [HttpGet("GetLastAddedArticles")]
+        public IActionResult GetLastAddedArticles()
+        {
+            
+            var articles = _context.Articles
+            .Where(a => a.IsLastArticle == true)
+            .Include(c => c.Category)
+            .Include(b => b.AppUser)
+            .FirstOrDefault();
+
+            var articleDtos = _mapper.Map<LastAddedArticlesDto>(articles);
+
+            return Ok(articleDtos);
+        }
+
+        [HttpGet("GetLastFourArticlesByCategory")]
+        public IActionResult GetLastFourArticlesByCategory()
+        {
+            var articles = _context.Articles
+            .Include(c => c.Category)
+            .OrderByDescending(y => y.CreatedDate)
+            .Take(5)
+            .ToList();
+            var articleDtos = _mapper.Map<List<GetLastFourArticleByCategoryDto>>(articles);
+
+            return Ok(articleDtos);
+        }
+
     }
 }
+

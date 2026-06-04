@@ -137,6 +137,7 @@ namespace BtkAkademiAi.WebApi.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ArticleId"));
 
                     b.Property<string>("AppUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ArticleContent")
@@ -147,7 +148,7 @@ namespace BtkAkademiAi.WebApi.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CategoryId")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("CoverImageUrl")
@@ -166,11 +167,20 @@ namespace BtkAkademiAi.WebApi.Migrations
                     b.Property<bool>("IsFeatureSlider")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("IsLastArticle")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsTrendingStories")
+                        .HasColumnType("bit");
+
                     b.Property<string>("MainImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SliderCategoryImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TrendImageUrl")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ArticleId");
@@ -265,6 +275,21 @@ namespace BtkAkademiAi.WebApi.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TradingVideoId"));
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FeatureImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFeature")
+                        .HasColumnType("bit");
+
                     b.Property<string>("VideoDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -278,6 +303,10 @@ namespace BtkAkademiAi.WebApi.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("TradingVideoId");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("TradingVideos");
                 });
@@ -419,10 +448,29 @@ namespace BtkAkademiAi.WebApi.Migrations
                 {
                     b.HasOne("BtkAkademiAi.WebApi.Entities.AppUser", "AppUser")
                         .WithMany("Articles")
-                        .HasForeignKey("AppUserId");
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("BtkAkademiAi.WebApi.Entities.Category", "Category")
                         .WithMany("Articles")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("BtkAkademiAi.WebApi.Entities.TradingVideo", b =>
+                {
+                    b.HasOne("BtkAkademiAi.WebApi.Entities.AppUser", "AppUser")
+                        .WithMany("TradingVideos")
+                        .HasForeignKey("AppUserId");
+
+                    b.HasOne("BtkAkademiAi.WebApi.Entities.Category", "Category")
+                        .WithMany("TradingVideos")
                         .HasForeignKey("CategoryId");
 
                     b.Navigation("AppUser");
@@ -484,11 +532,15 @@ namespace BtkAkademiAi.WebApi.Migrations
             modelBuilder.Entity("BtkAkademiAi.WebApi.Entities.AppUser", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("TradingVideos");
                 });
 
             modelBuilder.Entity("BtkAkademiAi.WebApi.Entities.Category", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("TradingVideos");
                 });
 #pragma warning restore 612, 618
         }

@@ -6,69 +6,91 @@
                     <h2>Son Eklenenler</h2>
                 </div>
             </div>
+
             <div class="col-md-4 text-right">
                 <a href="#" class="back-btn">View All</a>
             </div>
         </div>
+
         <div class="row">
+
             <div class="col-lg-8">
                 <ul>
                     <li>
                         <div class="image-area">
-                            <a href="#"><img src="~/Images/latest/Design.png" alt="image"></a>
+                            <a href="#">
+                                <img src=" @ViewBag.LastArticleTrendImageUrl" alt="image">
+                            </a>
+
                             <div class="back-btm-content">
-                                <a href="#" class="back-cate back-tra">Politika</a>
-                                <h3><a href="#">Amerikada Son gelişmeler <br>Siz ve izleyicileriniz için.</a></h3>
+                                <a href="#" class="back-cate back-tra">
+                                    @ViewBag.LastArticleCategory
+                                </a>
+
+                                <h3>
+                                    <a href="#">
+                                        @ViewBag.LastArticleTitle
+                                    </a>
+                                </h3>
+
                                 <ul>
-                                    <li class="back-author"><span><img src="/tema/assets/images/author/1.jpg" alt="image"></span><a href="#"> Emo</a></li>
-                                    <li class="back-date"><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-clock"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>26 Mart 2022</li>
-                                    <li class="back-comments"><span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>95 Yorum</li>
+                                    <li class="back-author">
+                                        <span>
+                                            <img src=" @ViewBag.LastArticleAuthorImageUrl" alt="image">
+                                        </span>
+
+                                        <a href="#">
+                                            @ViewBag.LastArticleAuthorName
+                                            @ViewBag.LastArticleAuthorSurname
+                                        </a>
+                                    </li>
+
+                                    <li class="back-date">
+                                        <span>
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="24"
+                                                 height="24"
+                                                 viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="2"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round"
+                                                 class="feather feather-clock">
+                                                <circle cx="12" cy="12" r="10"></circle>
+                                                <polyline points="12 6 12 12 16 14"></polyline>
+                                            </svg>
+                                        </span>
+
+                                        @ViewBag.LastArticleCreatedDate.ToString("dd-MMM-yyyy")
+                                    </li>
+
+                                    <li class="back-comments">
+                                        <span>
+                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                 width="24"
+                                                 height="24"
+                                                 viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="2"
+                                                 stroke-linecap="round"
+                                                 stroke-linejoin="round"
+                                                 class="feather feather-message-square">
+                                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                        </span>
+                                        95 Yorum
+                                    </li>
                                 </ul>
                             </div>
                         </div>
                     </li>
                 </ul>
             </div>
-            <div class="col-lg-4 md-mt-40">
-                <ul class="back-hero-bottom">
-                    <li>
-                        <div class="image-areas">
-                            <a href="#"><img src="~/Images/Latest/Travel.png" alt="image"></a>
-                        </div>
-                        <div class="back-btm-content">
-                            <a href="#" class="back-cates">Seyahat</a>
-                            <h3><a href="#">Dünyanın En Güzel Şehri İstanbulu Ziyaret Edin</a></h3>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="image-areas">
-                            <a href="#"><img src="~/Images/Latest/Art.png" alt="image"></a>
-                        </div>
-                        <div class="back-btm-content">
-                            <a href="#" class="back-cates">Sanat & Tasarım</a>
-                            <h3><a href="#">O kadının cennetten geldiği, bir melek gibi göründüğü söyleniyor</a></h3>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="image-areas">
-                            <a href="#"><img src="~/Images/Latest/Lifestyle.png" alt="image"></a>
-                        </div>
-                        <div class="back-btm-content">
-                            <a href="#" class="back-cates">Yaşam Tarzı</a>
-                            <h3><a href="#">Yeşil yapraklar fotoğrafı, sevimli kız modeli ile birlikte</a></h3>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="image-areas">
-                            <a href="#"><img src="~/Images/Latest/Fashion.png" alt="image"></a>
-                        </div>
-                        <div class="back-btm-content">
-                            <a href="#" class="back-cates">Moda</a>
-                            <h3><a href="#">Sonbahar Modası: Yeni Trendler ve Stil Önerileri</a></h3>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+
+			@await Component.InvokeAsync("_DefaultLast4ArticlesByCategoryComponentPartial")
+
         </div>
     </div>
 </div>

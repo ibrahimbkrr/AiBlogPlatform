@@ -11,7 +11,7 @@
     <body> 
 
 	@await Component.InvokeAsync("_LayoutRightSideBarComponentPartial")
-
+    
         <header id="back-header" class="back-header">
          
         @await Component.InvokeAsync("_LayoutHeaderComponentPartial")
@@ -36,10 +36,12 @@
         @await Component.InvokeAsync("_DefaultTrendingStroriesArticlesComponentPartial")
 
         @await Component.InvokeAsync("_DefaultLatestPostComponentPartial")
+
+		
          
         @await Component.InvokeAsync("_SubFeatureComponentPartial")
           
-        @await Component.InvokeAsync("_DefaultTradingVideoComponentPartial")
+        @await Component.InvokeAsync("_TradingVideoFeatureComponentPartial")
 
         @await Component.InvokeAsync("_SecondFeatureComponentPartial")
              
