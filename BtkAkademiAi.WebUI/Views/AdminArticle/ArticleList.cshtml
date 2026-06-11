@@ -1,84 +1,384 @@
 ﻿@model List<ResultArticleDto>
+
 @{
-    ViewData["Title"] = "ArticleList";
+    ViewData["Title"] = "Makale Listesi";
     Layout = "~/Views/AdminLayout/Index.cshtml";
 }
 
+<style>
+    .article-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        background-color: #ffffff;
+    }
+
+    .article-card-header {
+        background: linear-gradient(135deg, #f9fafb, #f3f6ff);
+        border-bottom: 1px solid #e5e7eb;
+        padding: 22px 24px;
+    }
+
+    .article-page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .article-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+
+    .article-table {
+        margin-bottom: 0;
+    }
+
+        .article-table thead th {
+            background-color: #f4f6f8;
+            color: #374151;
+            font-weight: 700;
+            font-size: 13px;
+            border-bottom: none;
+            padding: 14px 16px;
+            white-space: nowrap;
+        }
+
+        .article-table tbody td {
+            padding: 15px 16px;
+            vertical-align: middle;
+            color: #111827;
+            border-color: #eef0f3;
+            font-size: 14px;
+        }
+
+        .article-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .article-table tbody tr:hover {
+                background-color: #fafafa;
+            }
+
+    .article-id-badge {
+        min-width: 34px;
+        height: 28px;
+        border-radius: 9px;
+        background-color: #eef2ff;
+        color: #4f63d9;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .article-name-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 310px;
+    }
+
+    .article-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        background-color: #f1f5f9;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+    }
+
+    .article-name {
+        font-weight: 600;
+        color: #111827;
+        line-height: 1.35;
+    }
+
+    .article-meta {
+        font-size: 12px;
+        color: #7c8798;
+    }
+
+    .category-badge {
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-weight: 600;
+        background-color: #f1f5ff;
+        color: #4f63d9;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .author-box,
+    .date-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #374151;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+        .author-box i,
+        .date-box i {
+            color: #7c8798;
+        }
+
+    .action-btn {
+        min-width: 112px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 7px 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-view-soft {
+        color: #3b5bfd;
+        border: 1px solid #c7d2fe;
+        background-color: #ffffff;
+    }
+
+        .btn-view-soft:hover {
+            color: #ffffff;
+            background-color: #3b5bfd;
+            border-color: #3b5bfd;
+        }
+
+    .btn-update-soft {
+        color: #16803c;
+        border: 1px solid #bbf7d0;
+        background-color: #ffffff;
+    }
+
+        .btn-update-soft:hover {
+            color: #ffffff;
+            background-color: #16a34a;
+            border-color: #16a34a;
+        }
+
+    .btn-delete-soft {
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        background-color: #ffffff;
+    }
+
+        .btn-delete-soft:hover {
+            color: #ffffff;
+            background-color: #dc2626;
+            border-color: #dc2626;
+        }
+
+    .add-article-btn {
+        border-radius: 12px;
+        padding: 11px 22px;
+        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(59, 91, 253, 0.18);
+    }
+
+    .total-badge {
+        background-color: #eef2ff;
+        color: #3b5bfd;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-weight: 700;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .empty-message {
+        padding: 40px;
+        text-align: center;
+        color: #6b7280;
+    }
+</style>
+
 <main class="page-content">
-    <!--breadcrumb-->
-    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div class="breadcrumb-title pe-3">Makaleler</div>
+
+    <!-- Breadcrumb -->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-4">
+        <div class="breadcrumb-title pe-3 fw-semibold">
+            Makaleler
+        </div>
+
         <div class="ps-3">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 p-0">
                     <li class="breadcrumb-item">
-                        <a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                        <a href="javascript:;">
+                            <i class="bx bx-home-alt"></i>
+                        </a>
                     </li>
-                    <li class="breadcrumb-item active" aria-current="page">Makale Listesi</li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Makale Listesi
+                    </li>
                 </ol>
             </nav>
         </div>
-
     </div>
-    <!--end breadcrumb-->
+    <!-- End Breadcrumb -->
 
-    <div class="card">
-        <div class="card-body">
-            <div class="d-flex align-items-center">
-                <h5 class="mb-0">Makale Detayları</h5>
-                <form class="ms-auto position-relative">
-                    <div class="position-absolute top-50 translate-middle-y search-icon px-3"><i class="bi bi-search"></i></div>
-                    <input class="form-control ps-5" type="text" placeholder="search">
-                </form>
+    <div class="card article-card">
+
+        <div class="article-card-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+
+                <div>
+                    <h5 class="article-page-title">
+                        Makale Yönetimi
+                    </h5>
+                    <p class="article-subtitle">
+                        Sistemde kayıtlı makaleleri görüntüleyebilir, güncelleyebilir, silebilir veya sitedeki detay sayfasına gidebilirsin.
+                    </p>
+                </div>
+
+                <a href="/AdminArticle/CreateArticle" class="btn btn-primary add-article-btn">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Yeni Makale Ekle
+                </a>
+
             </div>
-            <div class="table-responsive mt-3">
-                <table class="table align-middle">
-                    <thead class="table-secondary">
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                <span class="total-badge">
+                    <i class="bi bi-newspaper"></i>
+                    Toplam Makale: @(Model != null ? Model.Count : 0)
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle article-table">
+
+                    <thead>
                         <tr>
-                            <th>#</th>
+                            <th style="width: 90px;">ID</th>
                             <th>Makale Başlığı</th>
-                            <th>Makale Oluşturulma Tarihi</th>
-                            <th>Makale Kategori Adı</th>
-                            <th>Makale Yazarı</th>
-                            <th>Makaleyi Sil</th>
-                            <th>Makaleyi Güncelle</th>
-                            <th>Makaleyi Sitede Gör</th>
-                            
-
-                            
-
+                            <th>Oluşturulma Tarihi</th>
+                            <th>Kategori</th>
+                            <th>Yazar</th>
+                            <th class="text-center" style="width: 145px;">Sitede Gör</th>
+                            <th class="text-center" style="width: 145px;">Güncelle</th>
+                            <th class="text-center" style="width: 145px;">Sil</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        @foreach (var item in Model)
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <span class="article-id-badge">
+                                            @item.ArticleId
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="article-name-box">
+                                            <span class="article-icon">
+                                                <i class="bi bi-newspaper"></i>
+                                            </span>
+
+                                            <div>
+                                                <div class="article-name">
+                                                    @item.ArticleTitle
+                                                </div>
+                                                <small class="article-meta">
+                                                    Makale kaydı
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="date-box">
+                                            <i class="bi bi-calendar3"></i>
+                                            @item.CreatedDate.ToString("dd-MMM-yyyy")
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="category-badge">
+                                            <i class="bi bi-folder2-open"></i>
+                                            @item.CategoryName
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="author-box">
+                                            <i class="bi bi-person-circle"></i>
+                                            @item.AuthorName @item.AuthorSurname
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="/Article/ArticleDetails/@item.ArticleId"
+                                           class="action-btn btn-view-soft"
+                                           title="Makaleyi sitede gör">
+                                            <i class="bi bi-eye-fill"></i>
+                                            Sitede Gör
+                                        </a>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="/AdminArticle/UpdateArticle/@item.ArticleId"
+                                           class="action-btn btn-update-soft"
+                                           title="Makaleyi güncelle">
+                                            <i class="bi bi-pencil-square"></i>
+                                            Güncelle
+                                        </a>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="/AdminArticle/DeleteArticle/@item.ArticleId"
+                                           class="action-btn btn-delete-soft"
+                                           title="Makaleyi sil"
+                                           onclick="return confirm('Bu makaleyi silmek istediğinize emin misiniz?');">
+                                            <i class="bi bi-trash3"></i>
+                                            Sil
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
                         {
                             <tr>
-                                <td>@item.ArticleId</td>
-                                <td>@item.ArticleTitle</td>
-                                <td>@item.CreatedDate.ToString("dd-MMM-yyyy")</td>
-								<td>@item.CategoryName</td>
-                                <td>@item.AuthorName @item.AuthorSurname</td>
-                                <td><a href="/AdminArticle/DeleteArticle/@item.ArticleId" class="btn btn-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Sil"><i class="bi bi-trash-fill"></i></a></td>
-                                <td><a href="/AdminArticle/UpdateArticle/@item.ArticleId" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Güncelle"><i class="bi bi-pencil-fill"></i></a></td>
-                                <td><a href="/Article/ArticleDetails/@item.ArticleId" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Makale Detayları"><i class="bi bi-eye-fill"></i></a></td>
-
-
-                             
+                                <td colspan="8">
+                                    <div class="empty-message">
+                                        <i class="bi bi-newspaper fs-2 d-block mb-2"></i>
+                                        Henüz kayıtlı makale bulunmuyor.
+                                    </div>
+                                </td>
                             </tr>
-
                         }
-
-
                     </tbody>
+
                 </table>
-                <a href="/AdminArticle/CreateArticle" class="btn btn-primary px-5">Yeni Makale Ekle</a>
             </div>
+
         </div>
     </div>
 
-
-
-
-
 </main>
-

@@ -4,6 +4,8 @@ using BtkAkademiAi.WebApi.Dtos.ArticleDtos;
 using BtkAkademiAi.WebApi.Dtos.TradingVideosDtos;
 using BtkAkademiAi.WebApi.Entities;
 using BtkAkademiAi.WebApi.Dtos.CategoryDtos;
+using BtkAkademiAi.WebApi.Dtos.CommentDto; 
+
 namespace BtkAkademiAi.WebApi.Mapping
 {
     public class GeneralMapping: Profile
@@ -98,10 +100,23 @@ namespace BtkAkademiAi.WebApi.Mapping
 
             CreateMap<Article, CreateArticleDto>().ReverseMap();
 
-                    CreateMap<Article, UpdateArticleDto>().ReverseMap();
+            CreateMap<Article, UpdateArticleDto>().ReverseMap();
 
-                    CreateMap<Article, GetArticleByIdDto>().ReverseMap();
+            CreateMap<Article, GetArticleByIdDto>().ReverseMap();
 
+            CreateMap<Comment, CreateCommentDto>().ReverseMap();
+            CreateMap<Comment, UpdateCommentDto>().ReverseMap();
+            CreateMap<Comment, GetCommentByIdDto>().ReverseMap();
+
+            CreateMap<Comment, ResultCommentDto>()
+              .ForMember(dest => dest.ArticleName,
+              opt => opt.MapFrom(src => src.Article.ArticleTitle))
+              .ForMember(dest => dest.AuthorName,
+              opt => opt.MapFrom(src => src.AppUser.Name))
+              .ForMember(dest => dest.AuthorImageUrl,
+                  opt => opt.MapFrom(src => src.AppUser.ImageUrl))
+              .ForMember(dest => dest.AuthorSurname,
+              opt => opt.MapFrom(src => src.AppUser.Surname));
 
         }
     }

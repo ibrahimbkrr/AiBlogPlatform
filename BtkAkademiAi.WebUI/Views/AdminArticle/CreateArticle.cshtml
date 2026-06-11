@@ -1,8 +1,70 @@
-﻿
+﻿@model CreateArticleDto
 @{
     ViewData["Title"] = "CreateArticle";
     Layout = "~/Views/AdminLayout/Index.cshtml";
 }
 
-<h1>CreateArticle</h1>
+<main class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Makaleler</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Yeni Makale Ekleme</li>
+                </ol>
+            </nav>
+        </div>
+
+    </div>
+    <!--end breadcrumb-->
+
+    <div class="card">
+        <div class="card-body">
+
+            <form method="post">
+                <label>Makale Başlığı </label>
+                <input type="text" asp-for="ArticleTitle" class="form-control" placeholder="Makale Başlığı Giriniz" />
+                <br />
+                <label>Kapak Resmi Thumbnail URL</label>
+                <input type="text" asp-for="CoverImageUrl" class="form-control" placeholder="Kapak Resmi Thumbnail URL Giriniz" />
+                <br />
+                <label>Makale Detayı Ana Resim URL </label>
+                <input type="text" asp-for="MainImageUrl" class="form-control" placeholder="Makale Detayı Ana Resim URL" />
+                <br />
+                <label>Kategori </label>
+               <select asp-for="CategoryId" class="form-control" asp-items="(IEnumerable<SelectListItem>)
+                  ViewBag.categoryList">
+
+					<option value="">--Kategori Seçiniz--</option>
+				</select>
+
+
+
+                <br />
+                <label>Öne Çıkan Slider Görsel URL </label>
+                <input type="text" asp-for="FeatureSliderImageUrl" class="form-control" placeholder="Öne Çıkan Slider Görsel URL Giriniz" />
+                <br />
+                <label>Öne Çıkan Görsel URL </label>
+                <input type="text" asp-for="FeatureImageUrl" class="form-control" placeholder="Öne Çıkan Görsel URL Giriniz" />
+                <br />
+                <label>Yazar Bilgisi </label>
+                <input type="text" asp-for="AppUserId" class="form-control" placeholder="Yazar Bilgisi Giriniz" />
+                <br />
+                <label>Makale İçeriği </label>
+                <input type="text" asp-for="ArticleContent" class="form-control" placeholder="Makale İçeriği Giriniz" />
+                <br />
+                <button type="submit" class="btn btn-primary px-5">Makaleyi Ekle</button>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+</main>
 

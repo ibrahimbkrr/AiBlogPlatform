@@ -24,7 +24,7 @@ namespace BtkAkademiAi.WebApi.Controllers
         [HttpGet]
         public IActionResult ArticleList()
         {
-            var articles = _context.Articles.Include(x => x.Category).ToList();
+            var articles = _context.Articles.Include(x => x.Category).Include(x => x.AppUser).ToList();
             var articleDtos = _mapper.Map<List<ResultArticleWithCategoryDto>>(articles);
             return Ok(articleDtos);
         }

@@ -1,5 +1,7 @@
 ﻿using BtkAkademiAi.WebUI.Dtos.ArticlesDtos;
+using BtkAkademiAi.WebUI.Dtos.CategoryDtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -31,12 +33,28 @@ namespace BtkAkademiAi.WebUI.Controllers
         [HttpGet]
         public IActionResult CreateArticle()
         {
+            var client = _httpClientFactory.CreateClient();
+
+            var responseMessage = client.GetAsync("https://localhost:7090/api/Categories").Result;
+
+            var jsonData = responseMessage.Content.ReadAsStringAsync().Result;
+
+            var categories = JsonConvert.DeserializeObject<List<ResultCategoryDto>>(jsonData);
+
+            List<SelectListItem> categoryList = (from x in categories
+                                                 select new SelectListItem
+                                                 {
+                                                     Text = x.CategoryName,
+                                                     Value = x.CategoryId.ToString()
+                                                 }).ToList();
+            ViewBag.categoryList = categoryList;
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateArticle(CreateArticleDto createArticleDto)
         {
+            createArticleDto.CreatedDate = DateTime.Now;
             var client = _httpClientFactory.CreateClient();
             var jsonData = JsonConvert.SerializeObject(createArticleDto);
             StringContent stringContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -51,17 +69,42 @@ namespace BtkAkademiAi.WebUI.Controllers
             return RedirectToAction("ArticleList");
         }
         [HttpGet]
-        public IActionResult UpdateArticle(int id)
+        public async Task<IActionResult> UpdateArticle(int id)
         {
             var client = _httpClientFactory.CreateClient();
-            var responseMessage = client.GetAsync($"https://localhost:7090/api/Articles/ID?id={id}").Result;
-            if (responseMessage.IsSuccessStatusCode)
+
+            
+            var responseMessageCategory = await client.GetAsync("https://localhost:7090/api/Categories");
+
+            if (responseMessageCategory.IsSuccessStatusCode)
             {
-                var jsonData = responseMessage.Content.ReadAsStringAsync().Result;
-                var Article = JsonConvert.DeserializeObject<GetArticleByIdDto>(jsonData);
-                return View(Article);
+                var jsonDataCategory = await responseMessageCategory.Content.ReadAsStringAsync();
+
+                var categories = JsonConvert.DeserializeObject<List<ResultCategoryDto>>(jsonDataCategory);
+
+                List<SelectListItem> categoryList = categories.Select(x => new SelectListItem
+                {
+                    Text = x.CategoryName,
+                    Value = x.CategoryId.ToString()
+                }).ToList();
+
+                ViewBag.categoryList = categoryList;
             }
-            return RedirectToAction("ArticleList");
+
+            
+            var responseMessageArticle = await client.GetAsync($"https://localhost:7090/api/Articles/{id}");
+
+            if (!responseMessageArticle.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Makale bulunamadı.";
+                return RedirectToAction("ArticleList");
+            }
+
+            var jsonDataArticle = await responseMessageArticle.Content.ReadAsStringAsync();
+
+            var article = JsonConvert.DeserializeObject<UpdateArticleDto>(jsonDataArticle);
+
+            return View(article);
         }
         [HttpPost]
         public async Task<IActionResult> UpdateArticle(UpdateArticleDto updateArticleDto)

@@ -1,0 +1,74 @@
+﻿@model List<ResultTradingVideoDto>
+@{
+    ViewData["Title"] = "TradingVideoList";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<main class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Videolu Makaleler</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Videolu Makaleler Listesi</li>
+                </ol>
+            </nav>
+        </div>
+
+    </div>
+    <!--end breadcrumb-->
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="table-responsive mt-3">
+                <table class="table align-middle">
+                    <thead class="table-secondary">
+                        <tr>
+                            <th>#</th>
+                            <th> Başlk</th>
+                            <th>Oluşturulma Tarihi</th>
+                            <th>Sil</th>
+                            <th>Güncelle</th>
+                            <th>YouTube'da Gör</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.TradingVideoId</td>
+                                <td>@item.VideoTitle </td>
+                                <td>@item.CreatedDate</td>
+                                <td>
+                                    <a href="TradingVideo/DeleteTradingVideo/@item.TradingVideoId" class="btn btn-danger" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Sil"><i class="bi bi-trash-fill"></i></a>
+                                </td>
+                                <td>
+                                    <a href="/TradingVideo/UpdateTradingVideo/@item.TradingVideoId" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Güncelle"><i class="bi bi-pencil-fill"></i></a>
+                                </td>
+                                <td>
+                                    <a href="/TradingVideo/TradingVideoDetails/@item.TradingVideoId" class="btn btn-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" title="YouTube'da Gör"><i class="bi bi-eye-fill"></i></a>
+                                </td>
+                            </tr>
+
+                        }
+
+
+                    </tbody>
+                </table>
+                <a href="/TradingVideo/CreateTradingVideo" class="btn btn-primary px-5">Yeni Videolu Makale Ekle</a>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+</main>
+

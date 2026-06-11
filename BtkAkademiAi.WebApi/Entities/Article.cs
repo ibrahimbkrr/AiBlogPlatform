@@ -23,7 +23,9 @@
         
         public bool? IsTrendingStories { get; set; }
 
-        public bool? IsLastArticle { get; set; } 
+        public bool? IsLastArticle { get; set; }
+
+        public List<Comment> Comments { get; set; }
 
 
 

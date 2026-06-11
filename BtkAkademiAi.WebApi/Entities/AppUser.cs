@@ -13,5 +13,7 @@ namespace BtkAkademiAi.WebApi.Entities
         public List<Article> Articles { get; set; }
 
         public List<TradingVideo> TradingVideos { get; set; }
+
+        public List<Comment> Comments { get; set; }
     }
 }
