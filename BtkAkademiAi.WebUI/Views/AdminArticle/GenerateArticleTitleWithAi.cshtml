@@ -1,0 +1,215 @@
+﻿@{
+    ViewData["Title"] = "AI ile Makale Başlığı Oluştur";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<main class="page-content">
+    <!--breadcrumb-->
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">AI Entegrasyonu</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/AdminArticle/ArticleList">
+                            <i class="bx bx-home-alt"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        AI ile Makale Başlığı Oluştur
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    <!--end breadcrumb-->
+
+    <div class="row">
+        <div class="col-xl-8 mx-auto">
+            <div class="card">
+                <div class="card-body p-4">
+
+                    <h5 class="mb-4">AI ile Makale Başlığı Oluştur</h5>
+
+                    <div class="mb-3">
+                        <label for="articleTextInput" class="form-label">
+                            Makale, özet veya konu metni
+                        </label>
+
+                        <textarea id="articleTextInput"
+                                  class="form-control"
+                                  rows="8"
+                                  minlength="10"
+                                  maxlength="3000"
+                                  placeholder="Örneğin: Yapay zekanın yazılım dünyasına etkileri, junior developerlar için fırsatlar ve riskler..."></textarea>
+
+                        <div class="text-muted mt-1">
+                            <span id="articleTextCharacterCount">0</span>/3000 karakter
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button"
+                                id="generateTitleBtn"
+                                class="btn btn-primary">
+                            Başlık Oluştur
+                        </button>
+
+                        <button type="button"
+                                id="clearBtn"
+                                class="btn btn-light">
+                            Temizle
+                        </button>
+                    </div>
+
+                    <div id="loadingArea" class="alert alert-info mt-4 d-none">
+                        Başlık oluşturuluyor, lütfen bekleyiniz...
+                    </div>
+
+                    <div id="errorArea" class="alert alert-danger mt-4 d-none"></div>
+
+                    <div id="resultArea" class="card mt-4 d-none">
+                        <div class="card-header">
+                            Oluşturulan Başlık
+                        </div>
+
+                        <div class="card-body">
+                            <h5 id="generatedTitle" class="card-title mb-3"></h5>
+
+                            <p class="text-muted mb-3">
+                                Başlık karakter sayısı:
+                                <span id="titleCharacterCount">0</span>
+                            </p>
+
+                            <button type="button"
+                                    id="copyBtn"
+                                    class="btn btn-success">
+                                Başlığı Kopyala
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const generateTitleBtn = document.getElementById("generateTitleBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const copyBtn = document.getElementById("copyBtn");
+
+    const articleTextInput = document.getElementById("articleTextInput");
+    const articleTextCharacterCount = document.getElementById("articleTextCharacterCount");
+
+    const loadingArea = document.getElementById("loadingArea");
+    const errorArea = document.getElementById("errorArea");
+    const resultArea = document.getElementById("resultArea");
+
+    const generatedTitle = document.getElementById("generatedTitle");
+    const titleCharacterCount = document.getElementById("titleCharacterCount");
+
+    articleTextInput.addEventListener("input", function () {
+        articleTextCharacterCount.innerText = articleTextInput.value.length;
+    });
+
+    generateTitleBtn.addEventListener("click", async function () {
+        const articleText = articleTextInput.value.trim();
+
+        if (!articleText) {
+            showError("Lütfen başlık oluşturmak için bir makale, özet veya konu giriniz.");
+            return;
+        }
+
+        if (articleText.length < 10) {
+            showError("En az 10 karakter giriniz.");
+            return;
+        }
+
+        if (articleText.length > 3000) {
+            showError("En fazla 3000 karakter girebilirsiniz.");
+            return;
+        }
+
+        hideError();
+        resultArea.classList.add("d-none");
+        loadingArea.classList.remove("d-none");
+
+        generateTitleBtn.disabled = true;
+        generateTitleBtn.innerText = "Oluşturuluyor...";
+
+        try {
+            const response = await fetch("@Url.Action("GenerateArticleTitleWithAi", "AdminArticle")", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    articleText: articleText
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                showError(data.message || "Başlık oluşturulurken bir hata oluştu.");
+                return;
+            }
+
+            generatedTitle.innerText = data.articleTitle;
+            titleCharacterCount.innerText = data.characterCount;
+
+            resultArea.classList.remove("d-none");
+        }
+        catch (error) {
+            showError("Sunucuya istek atılırken bir hata oluştu.");
+        }
+        finally {
+            loadingArea.classList.add("d-none");
+
+            generateTitleBtn.disabled = false;
+            generateTitleBtn.innerText = "Başlık Oluştur";
+        }
+    });
+
+    clearBtn.addEventListener("click", function () {
+        articleTextInput.value = "";
+        articleTextCharacterCount.innerText = "0";
+
+        generatedTitle.innerText = "";
+        titleCharacterCount.innerText = "0";
+
+        resultArea.classList.add("d-none");
+        loadingArea.classList.add("d-none");
+
+        hideError();
+    });
+
+    copyBtn.addEventListener("click", async function () {
+        const title = generatedTitle.innerText;
+
+        if (!title) {
+            return;
+        }
+
+        await navigator.clipboard.writeText(title);
+
+        copyBtn.innerText = "Kopyalandı";
+
+        setTimeout(function () {
+            copyBtn.innerText = "Başlığı Kopyala";
+        }, 1500);
+    });
+
+    function showError(message) {
+        errorArea.innerText = message;
+        errorArea.classList.remove("d-none");
+        loadingArea.classList.add("d-none");
+    }
+
+    function hideError() {
+        errorArea.innerText = "";
+        errorArea.classList.add("d-none");
+    }
+</script>

@@ -26,18 +26,13 @@ namespace BtkAkademiAi.WebUI.Controllers
                 var jsonData = await responseMessage.Content.ReadAsStringAsync();
                 var articles = JsonConvert.DeserializeObject<List<ResultArticleDto>>(jsonData);
                 return View(articles);
-                // Serialize metinden Json verisine dönüştürme işlemi
-                // Deserialize ise json verisini metine dönüştürme işlemi
+               
             }
 
             return View();
         }
 
-        public IActionResult ArticleListByCategory()
-        {
-            return View();
-        }
-
+       
 
     }
 }

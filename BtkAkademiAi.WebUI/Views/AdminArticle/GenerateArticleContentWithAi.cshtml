@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "OpenAI Makale Oluşturucu";
+    Layout = "~/Views/AdminLayout/Index.cshtml";
+}
+
+<main class="page-content">
+
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+        <div class="breadcrumb-title pe-3">Makaleler</div>
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="/AdminArticle/ArticleList">
+                            <i class="bx bx-home-alt"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        OpenAI Makale Oluşturucu
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <h5 class="mb-4">OpenAI ile Makale Oluştur</h5>
+
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                <label class="form-label">Makale Konusu</label>
+                <input type="text"
+                       id="aiPrompt"
+                       class="form-control"
+                       placeholder="Örn: Yapay zeka yazılım dünyasını nasıl değiştiriyor?" />
+            </div>
+
+            <button type="button" id="btnGenerateArticle" class="btn btn-primary">
+                Makale Oluştur
+            </button>
+
+            <span id="aiLoadingText" class="ms-2 text-muted" style="display:none;">
+                Makale oluşturuluyor...
+            </span>
+
+            <div id="aiMessage" class="mt-3"></div>
+
+            <hr />
+
+            <div class="mb-3">
+                <label class="form-label">Oluşturulan Makale</label>
+                <textarea id="articleContent"
+                          class="form-control"
+                          rows="18"
+                          placeholder="AI tarafından oluşturulan makale burada görünecek..."></textarea>
+            </div>
+
+            <button type="button" id="btnCopyArticle" class="btn btn-secondary">
+                Makaleyi Kopyala
+            </button>
+
+        </div>
+    </div>
+
+</main>
+
+<script>
+    document.getElementById("btnGenerateArticle").addEventListener("click", async function () {
+        const promptInput = document.getElementById("aiPrompt");
+        const prompt = promptInput.value.trim();
+
+        const messageDiv = document.getElementById("aiMessage");
+        const loadingText = document.getElementById("aiLoadingText");
+        const button = document.getElementById("btnGenerateArticle");
+        const articleContentElement = document.getElementById("articleContent");
+
+        messageDiv.innerHTML = "";
+
+        if (!prompt) {
+            messageDiv.innerHTML = '<div class="alert alert-warning">Lütfen makale konusu giriniz.</div>';
+            return;
+        }
+
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+
+        if (!tokenInput) {
+            messageDiv.innerHTML = '<div class="alert alert-danger">Anti-forgery token bulunamadı.</div>';
+            return;
+        }
+
+        const token = tokenInput.value;
+
+        try {
+            button.disabled = true;
+            loadingText.style.display = "inline";
+            articleContentElement.value = "";
+
+            const response = await fetch('/AdminArticle/GenerateArticleContentWithAi', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify({
+                    prompt: prompt
+                })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                messageDiv.innerHTML =
+                    `<div class="alert alert-danger">${result.message || 'Makale oluşturulurken hata oluştu.'}</div>`;
+                return;
+            }
+
+            articleContentElement.value = result.articleContent;
+
+            messageDiv.innerHTML =
+                `<div class="alert alert-success">
+                    Makale başarıyla oluşturuldu. Karakter sayısı: ${result.characterCount}
+                 </div>`;
+
+        } catch (error) {
+            messageDiv.innerHTML =
+                '<div class="alert alert-danger">AI isteği sırasında beklenmeyen bir hata oluştu.</div>';
+        } finally {
+            button.disabled = false;
+            loadingText.style.display = "none";
+        }
+    });
+
+    document.getElementById("btnCopyArticle").addEventListener("click", async function () {
+        const articleContent = document.getElementById("articleContent").value;
+        const messageDiv = document.getElementById("aiMessage");
+
+        if (!articleContent.trim()) {
+            messageDiv.innerHTML = '<div class="alert alert-warning">Kopyalanacak makale bulunamadı.</div>';
+            return;
+        }
+
+        await navigator.clipboard.writeText(articleContent);
+
+        messageDiv.innerHTML = '<div class="alert alert-info">Makale panoya kopyalandı.</div>';
+    });
+</script>

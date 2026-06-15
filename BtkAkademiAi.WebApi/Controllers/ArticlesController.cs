@@ -2,7 +2,6 @@
 using BtkAkademiAi.WebApi.Context;
 using BtkAkademiAi.WebApi.Dtos.ArticleDtos;
 using BtkAkademiAi.WebApi.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,68 +21,92 @@ namespace BtkAkademiAi.WebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult ArticleList()
+        public async Task<IActionResult> ArticleList()
         {
-            var articles = _context.Articles.Include(x => x.Category).Include(x => x.AppUser).ToList();
+            var articles = await _context.Articles
+                .Include(x => x.Category)
+                .Include(x => x.AppUser)
+                .ToListAsync();
+
             var articleDtos = _mapper.Map<List<ResultArticleWithCategoryDto>>(articles);
+
             return Ok(articleDtos);
         }
 
         [HttpPost]
-        public IActionResult CreateArticle(CreateArticleDto articleDto)
+        public async Task<IActionResult> CreateArticle(CreateArticleDto articleDto)
         {
             articleDto.CreatedDate = DateTime.Now;
-            var article = _mapper.Map<Article>(articleDto);
-            _context.Articles.Add(article);
-            _context.SaveChanges();
-            return Ok("Makale oluşturma başarılı");
 
+            var article = _mapper.Map<Article>(articleDto);
+
+            await _context.Articles.AddAsync(article);
+            await _context.SaveChangesAsync();
+
+            return Ok("Makale oluşturma başarılı");
         }
 
         [HttpDelete("{id}")]
-        public IActionResult DeleteArticle(int id)
+        public async Task<IActionResult> DeleteArticle(int id)
         {
-            var article = _context.Articles.Find(id);
+            var article = await _context.Articles.FindAsync(id);
+
             if (article == null)
             {
                 return NotFound("Makale bulunamadı");
             }
 
             _context.Articles.Remove(article);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
             return Ok("Makale silme başarılı");
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetArticleById(int id)
+        public async Task<IActionResult> GetArticleById(int id)
         {
-            var article = _context.Articles.Find(id);
+            var article = await _context.Articles.FindAsync(id);
+
             if (article == null)
             {
                 return NotFound("Makale bulunamadı");
             }
-            var articleDto = _mapper.Map<GetArticleByIdDto>(article);
-            return Ok(articleDto);
 
+            var articleDto = _mapper.Map<GetArticleByIdDto>(article);
+
+            return Ok(articleDto);
         }
 
         [HttpPut]
-        public IActionResult UpdateArticle(UpdateArticleDto articleDto)
+        public async Task<IActionResult> UpdateArticle(UpdateArticleDto articleDto)
         {
-            var article = _mapper.Map<Article>(articleDto);
-            _context.Articles.Update(article);
-            _context.SaveChanges();
+            if (articleDto == null)
+            {
+                return BadRequest("Makale bilgisi boş gönderildi");
+            }
+
+            var article = await _context.Articles.FindAsync(articleDto.ArticleId);
+
+            if (article == null)
+            {
+                return NotFound("Makale bulunamadı");
+            }
+
+            _mapper.Map(articleDto, article);
+
+            await _context.SaveChangesAsync();
+
             return Ok("Makale güncelleme başarılı");
         }
 
         [HttpGet("feature-slider")]
-        public IActionResult GetFeatureSliderArticles()
+        public async Task<IActionResult> GetFeatureSliderArticles()
         {
-            var articles = _context.Articles
+            var articles = await _context.Articles
                 .Where(a => a.IsFeatureSlider)
                 .Include(c => c.Category)
                 .Include(b => b.AppUser)
-                .ToList();
+                .ToListAsync();
 
             var articleDtos = _mapper.Map<List<ResultArticleWithCategoryDto>>(articles);
 
@@ -91,55 +114,88 @@ namespace BtkAkademiAi.WebApi.Controllers
         }
 
         [HttpGet("last-technology-article")]
-        public IActionResult GetLastTechnologyArticle()
+        public async Task<IActionResult> GetLastTechnologyArticle()
         {
-            var categoryId = _context.Categories
+            var categoryId = await _context.Categories
                 .Where(x => x.CategoryName == "Teknoloji")
                 .Select(x => x.CategoryId)
-                .FirstOrDefault();
-            var articles = _context.Articles
+                .FirstOrDefaultAsync();
+
+            var article = await _context.Articles
                 .Where(x => x.CategoryId == categoryId)
-                .Include(c => c.AppUser)
-                .OrderByDescending(y => y.ArticleId)
-                .Take(1).FirstOrDefault();
-            return Ok(_mapper.Map<ResultLastTechnologyDto>(articles));
+                .Include(x => x.Category)
+                .Include(x => x.AppUser)
+                .OrderByDescending(x => x.ArticleId)
+                .FirstOrDefaultAsync();
+
+            if (article == null)
+            {
+                return NotFound("Teknoloji kategorisinde makale bulunamadı");
+            }
+
+            var articleDto = _mapper.Map<ResultLastTechnologyDto>(article);
+
+            return Ok(articleDto);
         }
 
         [HttpGet("last-sports-article")]
-        public IActionResult GetLastSportsArticle()
+        public async Task<IActionResult> GetLastSportsArticle()
         {
-            var categoryId = _context.Categories
+            var categoryId = await _context.Categories
                 .Where(x => x.CategoryName == "Spor")
                 .Select(x => x.CategoryId)
-                .FirstOrDefault();
-            var articles = _context.Articles
+                .FirstOrDefaultAsync();
+
+            var article = await _context.Articles
                 .Where(x => x.CategoryId == categoryId)
-                .OrderByDescending(y => y.ArticleId)
-                 .Include(c => c.AppUser)
-                .Take(1).FirstOrDefault();
-            return Ok(_mapper.Map<ResultLastSportsDto>(articles));
+                .Include(x => x.Category)
+                .Include(x => x.AppUser)
+                .OrderByDescending(x => x.ArticleId)
+                .FirstOrDefaultAsync();
+
+            if (article == null)
+            {
+                return NotFound("Spor kategorisinde makale bulunamadı");
+            }
+
+            var articleDto = _mapper.Map<ResultLastSportsDto>(article);
+
+            return Ok(articleDto);
         }
 
         [HttpGet("last-egitim-article")]
-        public IActionResult GetLastEgitimArticle()
+        public async Task<IActionResult> GetLastEgitimArticle()
         {
-            var categoryId = _context.Categories
+            var categoryId = await _context.Categories
                 .Where(x => x.CategoryName == "Eğitim")
                 .Select(x => x.CategoryId)
-                .FirstOrDefault();
-            var articles = _context.Articles
+                .FirstOrDefaultAsync();
+
+            var article = await _context.Articles
                 .Where(x => x.CategoryId == categoryId)
-                .OrderByDescending(y => y.ArticleId)
-                .Include(c => c.AppUser)
-                .Take(1).FirstOrDefault();
-            return Ok(_mapper.Map<ResultLastEgitimDto>(articles));
+                .Include(x => x.Category)
+                .Include(x => x.AppUser)
+                .OrderByDescending(x => x.ArticleId)
+                .FirstOrDefaultAsync();
+
+            if (article == null)
+            {
+                return NotFound("Eğitim kategorisinde makale bulunamadı");
+            }
+
+            var articleDto = _mapper.Map<ResultLastEgitimDto>(article);
+
+            return Ok(articleDto);
         }
+
         [HttpGet("GetLastArticlesByDifferentCategories")]
-        public IActionResult GetLastArticlesByDifferentCategories()
+        public async Task<IActionResult> GetLastArticlesByDifferentCategories()
         {
-            var articles = _context.Articles
+            var articles = await _context.Articles
                 .Include(a => a.Category)
-                .ToList()
+                .ToListAsync();
+
+            var lastArticles = articles
                 .GroupBy(a => a.CategoryId)
                 .Select(g => g.OrderByDescending(a => a.CreatedDate).FirstOrDefault())
                 .Where(a => a != null)
@@ -147,55 +203,56 @@ namespace BtkAkademiAi.WebApi.Controllers
                 .Take(5)
                 .ToList();
 
-            var articleDtos = _mapper.Map<List<LastArticleByCategoryDto>>(articles);
+            var articleDtos = _mapper.Map<List<LastArticleByCategoryDto>>(lastArticles);
 
             return Ok(articleDtos);
         }
 
         [HttpGet("GetTrendingArticles")]
-
-        public IActionResult GetTrendingArticles()
+        public async Task<IActionResult> GetTrendingArticles()
         {
-            var articles = _context.Articles
-              .Where(a => a.IsTrendingStories == true)
-              .Include(c => c.Category)
-              .Include(b => b.AppUser)
-              .ToList();
+            var articles = await _context.Articles
+                .Where(a => a.IsTrendingStories == true)
+                .Include(c => c.Category)
+                .Include(b => b.AppUser)
+                .ToListAsync();
 
             var articleDtos = _mapper.Map<List<TrendArticlesDto>>(articles);
 
             return Ok(articleDtos);
-
-
         }
+
         [HttpGet("GetLastAddedArticles")]
-        public IActionResult GetLastAddedArticles()
+        public async Task<IActionResult> GetLastAddedArticles()
         {
-            
-            var articles = _context.Articles
-            .Where(a => a.IsLastArticle == true)
-            .Include(c => c.Category)
-            .Include(b => b.AppUser)
-            .FirstOrDefault();
+            var article = await _context.Articles
+                .Where(a => a.IsLastArticle == true)
+                .Include(c => c.Category)
+                .Include(b => b.AppUser)
+                .FirstOrDefaultAsync();
 
-            var articleDtos = _mapper.Map<LastAddedArticlesDto>(articles);
+            if (article == null)
+            {
+                return NotFound("Son eklenen makale bulunamadı");
+            }
 
-            return Ok(articleDtos);
+            var articleDto = _mapper.Map<LastAddedArticlesDto>(article);
+
+            return Ok(articleDto);
         }
 
         [HttpGet("GetLastFourArticlesByCategory")]
-        public IActionResult GetLastFourArticlesByCategory()
+        public async Task<IActionResult> GetLastFourArticlesByCategory()
         {
-            var articles = _context.Articles
-            .Include(c => c.Category)
-            .OrderByDescending(y => y.CreatedDate)
-            .Take(5)
-            .ToList();
+            var articles = await _context.Articles
+                .Include(c => c.Category)
+                .OrderByDescending(y => y.CreatedDate)
+                .Take(5)
+                .ToListAsync();
+
             var articleDtos = _mapper.Map<List<GetLastFourArticleByCategoryDto>>(articles);
 
             return Ok(articleDtos);
         }
-
     }
 }
-
