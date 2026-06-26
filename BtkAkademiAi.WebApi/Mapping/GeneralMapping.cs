@@ -123,6 +123,16 @@ namespace BtkAkademiAi.WebApi.Mapping
                     opt => opt.MapFrom(src => src.AppUser.ImageUrl))
                 .ForMember(dest => dest.AuthorSurname,
                     opt => opt.MapFrom(src => src.AppUser.Surname));
+
+                        CreateMap<Comment, ResultCommentWithArticleAndAuthorDto>()
+                .ForMember(dest => dest.ArticleName,
+                    opt => opt.MapFrom(src => src.Article.ArticleTitle))
+                .ForMember(dest => dest.AuthorName,
+                    opt => opt.MapFrom(src => src.AppUser.Name))
+                .ForMember(dest => dest.AuthorImageUrl,
+                    opt => opt.MapFrom(src => src.AppUser.ImageUrl))
+                .ForMember(dest => dest.AuthorSurname,
+                    opt => opt.MapFrom(src => src.AppUser.Surname));
         }
     }
 }

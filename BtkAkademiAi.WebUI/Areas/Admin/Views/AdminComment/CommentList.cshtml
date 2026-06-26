@@ -1,8 +1,899 @@
-﻿
+﻿@model List<ResultCommentDto>
+
 @{
-    ViewData["Title"] = "CommentList";
+    ViewData["Title"] = "Yorum Listesi";
     Layout = "~/Views/AdminLayout/Index.cshtml";
+
+    var totalCommentCount = Model != null ? Model.Count : 0;
+    var confirmedCommentCount = Model != null ? Model.Count(x => x.IsConfirm) : 0;
+    var pendingCommentCount = totalCommentCount - confirmedCommentCount;
+
+    var averageRating = Model != null && Model.Any(x => x.Rating > 0)
+        ? Model.Where(x => x.Rating > 0).Average(x => x.Rating)
+        : 0m;
+
+    var averageRatingText = averageRating % 1 == 0
+        ? averageRating.ToString("0")
+        : averageRating.ToString("0.0");
 }
 
-<h1>CommentList</h1>
+<style>
+    .comment-card {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        background-color: #ffffff;
+    }
 
+    .comment-card-header {
+        background: linear-gradient(135deg, #f9fafb, #f3f6ff);
+        border-bottom: 1px solid #e5e7eb;
+        padding: 22px 24px;
+    }
+
+    .comment-page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .comment-subtitle {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+
+    .add-comment-btn {
+        border-radius: 12px;
+        padding: 11px 22px;
+        font-weight: 600;
+        box-shadow: 0 8px 18px rgba(59, 91, 253, 0.18);
+    }
+
+    .comment-summary-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .summary-badge {
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-weight: 700;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .summary-total {
+        background-color: #eef2ff;
+        color: #3b5bfd;
+    }
+
+    .summary-approved {
+        background-color: #ecfdf3;
+        color: #16803c;
+    }
+
+    .summary-pending {
+        background-color: #fff7ed;
+        color: #c2410c;
+    }
+
+    .summary-rating {
+        background-color: #fffbeb;
+        color: #b45309;
+    }
+
+    .comment-table {
+        margin-bottom: 0;
+    }
+
+        .comment-table thead th {
+            background-color: #f4f6f8;
+            color: #374151;
+            font-weight: 700;
+            font-size: 13px;
+            border-bottom: none;
+            padding: 14px 16px;
+            white-space: nowrap;
+        }
+
+        .comment-table tbody td {
+            padding: 15px 16px;
+            vertical-align: middle;
+            color: #111827;
+            border-color: #eef0f3;
+            font-size: 14px;
+        }
+
+        .comment-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+            .comment-table tbody tr:hover {
+                background-color: #fafafa;
+            }
+
+    .comment-id-badge {
+        min-width: 34px;
+        height: 28px;
+        border-radius: 9px;
+        background-color: #eef2ff;
+        color: #4f63d9;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+    }
+
+    .comment-text-box {
+        max-width: 520px;
+        background-color: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 12px 14px;
+        color: #374151;
+        line-height: 1.5;
+    }
+
+    .comment-text {
+        margin-bottom: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .date-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #374151;
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+        .date-box i {
+            color: #7c8798;
+        }
+
+    .rating-box {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        border-radius: 999px;
+        padding: 7px 12px;
+        background-color: #fffbeb;
+        color: #f59e0b;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+        .rating-box i {
+            font-size: 13px;
+        }
+
+    .rating-value {
+        color: #92400e;
+        margin-left: 5px;
+        font-size: 12px;
+    }
+
+    .comment-author-box {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 210px;
+    }
+
+    .comment-author-img {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #eef2ff;
+        background-color: #f1f5f9;
+    }
+
+    .comment-author-fallback {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: #eef2ff;
+        color: #4f63d9;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        border: 2px solid #eef2ff;
+    }
+
+    .comment-author-name {
+        font-weight: 600;
+        color: #111827;
+        line-height: 1.3;
+    }
+
+    .comment-author-label {
+        color: #7c8798;
+        font-size: 12px;
+    }
+
+    .article-badge {
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-weight: 600;
+        background-color: #f1f5ff;
+        color: #4f63d9;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        font-size: 13px;
+        max-width: 290px;
+        text-decoration: none;
+    }
+
+        .article-badge:hover {
+            color: #3b5bfd;
+            background-color: #eef2ff;
+        }
+
+        .article-badge span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .status-badge {
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-weight: 700;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .status-approved {
+        background-color: #ecfdf3;
+        color: #16803c;
+    }
+
+    .status-pending {
+        background-color: #fff7ed;
+        color: #c2410c;
+    }
+
+    .action-btn {
+        min-width: 96px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 12px;
+        padding: 7px 13px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        border: none;
+    }
+
+    .btn-detail-soft {
+        color: #3b5bfd;
+        border: 1px solid #c7d2fe;
+        background-color: #ffffff;
+    }
+
+        .btn-detail-soft:hover {
+            color: #ffffff;
+            background-color: #3b5bfd;
+            border-color: #3b5bfd;
+        }
+
+    .btn-delete-soft {
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        background-color: #ffffff;
+    }
+
+        .btn-delete-soft:hover {
+            color: #ffffff;
+            background-color: #dc2626;
+            border-color: #dc2626;
+        }
+
+    .empty-message {
+        padding: 42px;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .comment-detail-modal .modal-content {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 22px 70px rgba(15, 23, 42, 0.28);
+    }
+
+    .comment-detail-modal .modal-header {
+        background: linear-gradient(135deg, #f9fafb, #eef2ff);
+        border-bottom: 1px solid #e5e7eb;
+        padding: 20px 22px;
+    }
+
+    .comment-detail-title {
+        font-size: 19px;
+        font-weight: 700;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .comment-detail-title i {
+            color: #3b5bfd;
+        }
+
+    .comment-detail-body {
+        padding: 22px;
+    }
+
+    .comment-detail-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .comment-detail-info-item {
+        background-color: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 13px 14px;
+    }
+
+    .comment-detail-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .comment-detail-value {
+        font-size: 14px;
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .comment-detail-user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .comment-detail-user img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eef2ff;
+        }
+
+    .comment-detail-user-fallback {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background-color: #eef2ff;
+        color: #4f63d9;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .comment-detail-text-box {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .comment-detail-text-title {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .comment-detail-text {
+        color: #374151;
+        line-height: 1.65;
+        font-size: 14px;
+        margin-bottom: 0;
+    }
+
+    .comment-detail-footer {
+        border-top: 1px solid #e5e7eb;
+        padding: 14px 22px;
+        background-color: #ffffff;
+    }
+
+    @@media (max-width: 768px) {
+        .comment-detail-info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<main class="page-content">
+
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-4">
+        <div class="breadcrumb-title pe-3 fw-semibold">
+            Yorumlar
+        </div>
+
+        <div class="ps-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0 p-0">
+                    <li class="breadcrumb-item">
+                        <a href="javascript:;">
+                            <i class="bx bx-home-alt"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">
+                        Yorum Listesi
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="card comment-card">
+
+        <div class="comment-card-header">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+
+                <div>
+                    <h5 class="comment-page-title">
+                        Yorum Yönetimi
+                    </h5>
+                    <p class="comment-subtitle">
+                        Sistemdeki kullanıcı yorumlarını, yorum sahiplerini, puanlarını, durumlarını ve yorum yapılan makaleleri görüntüleyebilirsin.
+                    </p>
+                </div>
+
+                <a href="/Comment/CreateComment" class="btn btn-primary add-comment-btn">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Yeni Yorum Ekle
+                </a>
+
+            </div>
+        </div>
+
+        <div class="card-body p-4">
+
+            <div class="comment-summary-wrapper">
+                <span class="summary-badge summary-total">
+                    <i class="bi bi-chat-left-text"></i>
+                    Toplam Yorum: @totalCommentCount
+                </span>
+
+                <span class="summary-badge summary-approved">
+                    <i class="bi bi-check-circle"></i>
+                    Onaylı: @confirmedCommentCount
+                </span>
+
+                <span class="summary-badge summary-pending">
+                    <i class="bi bi-hourglass-split"></i>
+                    Bekleyen: @pendingCommentCount
+                </span>
+
+                <span class="summary-badge summary-rating">
+                    <i class="bi bi-star-fill"></i>
+                    Ortalama Puan: @averageRatingText
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle comment-table">
+
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">ID</th>
+                            <th>Yorum Metni</th>
+                            <th style="width: 170px;">Yorum Tarihi</th>
+                            <th class="text-center" style="width: 170px;">Puan</th>
+                            <th style="width: 240px;">Yorum Yapan</th>
+                            <th>Yorum Yapılan Makale</th>
+                            <th class="text-center" style="width: 140px;">Durum</th>
+                            <th class="text-center" style="width: 130px;">Detay</th>
+                            <th class="text-center" style="width: 130px;">Sil</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                var authorFullName = $"{item.AuthorName} {item.AuthorSurname}".Trim();
+
+                                if (string.IsNullOrWhiteSpace(authorFullName))
+                                {
+                                    authorFullName = "Bilinmeyen Kullanıcı";
+                                }
+
+                                var statusText = !string.IsNullOrWhiteSpace(item.CommentStatus)
+                                ? item.CommentStatus
+                                : item.IsConfirm ? "Onaylandı" : "Beklemede";
+
+                                var statusClass = item.IsConfirm
+                                ? "status-approved"
+                                : "status-pending";
+
+                                var authorImageUrl = item.AuthorImageUrl?.Replace("\\", "/");
+
+                                var rating = item.Rating;
+
+                                if (rating < 0)
+                                {
+                                    rating = 0;
+                                }
+
+                                if (rating > 5)
+                                {
+                                    rating = 5;
+                                }
+
+                                var ratingText = rating % 1 == 0
+                                ? rating.ToString("0")
+                                : rating.ToString("0.0");
+
+                                <tr>
+                                    <td>
+                                        <span class="comment-id-badge">
+                                            @item.CommentId
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="comment-text-box">
+                                            <p class="comment-text" title="@item.CommentText">
+                                                @item.CommentText
+                                            </p>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="date-box">
+                                            <i class="bi bi-calendar3"></i>
+                                            @item.CommentDate.ToString("dd-MMM-yyyy")
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="rating-box" title="@ratingText / 5">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (rating >= i)
+                                                {
+                                                    <i class="bi bi-star-fill"></i>
+                                                }
+                                                else if (rating >= i - 0.5m)
+                                                {
+                                                    <i class="bi bi-star-half"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-star"></i>
+                                                }
+                                            }
+
+                                            <span class="rating-value">
+                                                @ratingText/5
+                                            </span>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="comment-author-box">
+                                            @if (!string.IsNullOrWhiteSpace(authorImageUrl))
+                                            {
+                                                <img src="@authorImageUrl"
+                                                     class="comment-author-img"
+                                                     alt="@authorFullName" />
+                                            }
+                                            else
+                                            {
+                                                <span class="comment-author-fallback">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </span>
+                                            }
+
+                                            <div>
+                                                <div class="comment-author-name">
+                                                    @authorFullName
+                                                </div>
+                                                <small class="comment-author-label">
+                                                    Yorum sahibi
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <a href="/Article/ArticleDetails/@item.ArticleId"
+                                           class="article-badge"
+                                           title="@item.ArticleName">
+                                            <i class="bi bi-newspaper"></i>
+                                            <span>@item.ArticleName</span>
+                                        </a>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="status-badge @statusClass">
+                                            @if (item.IsConfirm)
+                                            {
+                                                <i class="bi bi-check-circle"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-hourglass-split"></i>
+                                            }
+
+                                            @statusText
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <button type="button"
+                                                class="action-btn btn-detail-soft"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#commentDetailModal-@item.CommentId">
+                                            <i class="bi bi-eye-fill"></i>
+                                            Detay
+                                        </button>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <a href="/Comment/DeleteComment/@item.CommentId"
+                                           class="action-btn btn-delete-soft"
+                                           title="Yorumu sil"
+                                           onclick="return confirm('Bu yorumu silmek istediğinize emin misiniz?');">
+                                            <i class="bi bi-trash3"></i>
+                                            Sil
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9">
+                                    <div class="empty-message">
+                                        <i class="bi bi-chat-left-text fs-2 d-block mb-2"></i>
+                                        Henüz kayıtlı yorum bulunmuyor.
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    var authorFullName = $"{item.AuthorName} {item.AuthorSurname}".Trim();
+
+                    if (string.IsNullOrWhiteSpace(authorFullName))
+                    {
+                        authorFullName = "Bilinmeyen Kullanıcı";
+                    }
+
+                    var statusText = !string.IsNullOrWhiteSpace(item.CommentStatus)
+                    ? item.CommentStatus
+                    : item.IsConfirm ? "Onaylandı" : "Beklemede";
+
+                    var statusClass = item.IsConfirm
+                    ? "status-approved"
+                    : "status-pending";
+
+                    var authorImageUrl = item.AuthorImageUrl?.Replace("\\", "/");
+
+                    var rating = item.Rating;
+
+                    if (rating < 0)
+                    {
+                        rating = 0;
+                    }
+
+                    if (rating > 5)
+                    {
+                        rating = 5;
+                    }
+
+                    var ratingText = rating % 1 == 0
+                    ? rating.ToString("0")
+                    : rating.ToString("0.0");
+
+                    <div class="modal fade comment-detail-modal"
+                         id="commentDetailModal-@item.CommentId"
+                         tabindex="-1"
+                         aria-labelledby="commentDetailModalLabel-@item.CommentId"
+                         aria-hidden="true">
+
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h5 class="modal-title comment-detail-title" id="commentDetailModalLabel-@item.CommentId">
+                                        <i class="bi bi-chat-left-text"></i>
+                                        Yorum Detayı
+                                    </h5>
+
+                                    <button type="button"
+                                            class="btn-close"
+                                            data-bs-dismiss="modal"
+                                            aria-label="Kapat">
+                                    </button>
+                                </div>
+
+                                <div class="modal-body comment-detail-body">
+
+                                    <div class="comment-detail-info-grid">
+
+                                        <div class="comment-detail-info-item">
+                                            <div class="comment-detail-label">
+                                                Makale
+                                            </div>
+                                            <div class="comment-detail-value">
+                                                @item.ArticleName
+                                            </div>
+                                        </div>
+
+                                        <div class="comment-detail-info-item">
+                                            <div class="comment-detail-label">
+                                                Kullanıcı
+                                            </div>
+
+                                            <div class="comment-detail-user">
+                                                @if (!string.IsNullOrWhiteSpace(authorImageUrl))
+                                                {
+                                                    <img src="@authorImageUrl" alt="@authorFullName" />
+                                                }
+                                                else
+                                                {
+                                                    <span class="comment-detail-user-fallback">
+                                                        <i class="bi bi-person-fill"></i>
+                                                    </span>
+                                                }
+
+                                                <div>
+                                                    <div class="comment-detail-value">
+                                                        @authorFullName
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        Yorum sahibi
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="comment-detail-info-item">
+                                            <div class="comment-detail-label">
+                                                Tarih
+                                            </div>
+                                            <div class="comment-detail-value">
+                                                <i class="bi bi-calendar3 me-1"></i>
+                                                @item.CommentDate.ToString("dd-MMM-yyyy")
+                                            </div>
+                                        </div>
+
+                                        <div class="comment-detail-info-item">
+                                            <div class="comment-detail-label">
+                                                Puan
+                                            </div>
+
+                                            <span class="rating-box" title="@ratingText / 5">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (rating >= i)
+                                                    {
+                                                        <i class="bi bi-star-fill"></i>
+                                                    }
+                                                    else if (rating >= i - 0.5m)
+                                                    {
+                                                        <i class="bi bi-star-half"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-star"></i>
+                                                    }
+                                                }
+
+                                                <span class="rating-value">
+                                                    @ratingText/5
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        <div class="comment-detail-info-item">
+                                            <div class="comment-detail-label">
+                                                Durum
+                                            </div>
+
+                                            <span class="status-badge @statusClass">
+                                                @if (item.IsConfirm)
+                                                {
+                                                    <i class="bi bi-check-circle"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-hourglass-split"></i>
+                                                }
+
+                                                @statusText
+                                            </span>
+                                        </div>
+
+                                        <div class="comment-detail-info-item">
+                                            <div class="comment-detail-label">
+                                                Yorum ID
+                                            </div>
+                                            <div class="comment-detail-value">
+                                                #@item.CommentId
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="comment-detail-text-box">
+                                        <div class="comment-detail-text-title">
+                                            Yorum Metni
+                                        </div>
+
+                                        <p class="comment-detail-text">
+                                            @item.CommentText
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer comment-detail-footer">
+                                    <a href="/Article/ArticleDetails/@item.ArticleId"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-newspaper me-1"></i>
+                                        Makaleye Git
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-light btn-sm"
+                                            data-bs-dismiss="modal">
+                                        Kapat
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+        </div>
+    </div>
+
+</main>

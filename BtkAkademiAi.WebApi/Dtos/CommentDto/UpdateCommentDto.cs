@@ -17,5 +17,7 @@ namespace BtkAkademiAi.WebApi.Dtos.CommentDto
         public string AppUserId { get; set; }
 
         public int ArticleId { get; set; }
+
+        public decimal Rating { get; set; }
     }
 }

@@ -23,5 +23,7 @@
         public string AuthorSurname { get; set; }
 
         public string AuthorImageUrl { get; set; }
+
+        public decimal Rating { get; set; }
     }
 }

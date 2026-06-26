@@ -20,5 +20,7 @@
 
         public Article Article { get; set; }
 
+        public decimal Rating { get; set; }
+
     }
 }
